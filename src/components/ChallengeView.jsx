@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useCourse } from '../context/CourseContext';
 import { runPythonCode } from '../utils/pythonRunner';
+import { editorThemeExtension, persianBidiPlugin } from '../utils/codeEditorConfig';
 
 export default function ChallengeView() {
   const { currentChapter, completedChallenges, markChallengeComplete } = useCourse();
@@ -330,7 +331,8 @@ export default function ChallengeView() {
               height="360px"
               extensions={[
                 python(),
-                EditorView.lineWrapping
+                editorThemeExtension,
+                persianBidiPlugin
               ]}
               theme={oneDark}
               onChange={(val) => setUserCode(val)}

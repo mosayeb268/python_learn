@@ -17,6 +17,7 @@ import {
   Keyboard
 } from 'lucide-react';
 import { runPythonCode } from '../utils/pythonRunner';
+import { editorThemeExtension, persianBidiPlugin } from '../utils/codeEditorConfig';
 
 const PRESET_EXAMPLES = [
   {
@@ -330,7 +331,8 @@ export default function CodePlayground({ initialCode, onBack }) {
               height="480px"
               extensions={[
                 python(),
-                EditorView.lineWrapping
+                editorThemeExtension,
+                persianBidiPlugin
               ]}
               theme={oneDark}
               onChange={(val) => setCode(val)}

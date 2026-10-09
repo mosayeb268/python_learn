@@ -22,7 +22,7 @@ export function CourseProvider({ children }) {
 
   // Playground code state
   const [playgroundCode, setPlaygroundCode] = useState(
-    '# به محیط تعاملی پایتون خوش آمدید!\n# کد خود را بنویسید و روی دکمه «اجرای کد» کلیک کنید.\n\nname = "دانشجو"\nprint(f"سلام {name}! پایتون را با لذت یاد بگیر.")\n'
+    '# محاسبات مستقیم درون دستور چاپ\nprint("حاصل جمع 15 و 25 برابر است با:", 15 + 25)\nprint("محیط مستطیل به ابعاد 4 و 6:", 2 * (4 + 6))\n'
   );
 
   // Student progress in LocalStorage
