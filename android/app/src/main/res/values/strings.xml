@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">آموزش پایتون</string>
+    <string name="title_activity_main">آموزش جامع پایتون</string>
+    <string name="package_name">ir.jafarnejad.python</string>
+    <string name="custom_url_scheme">ir.jafarnejad.python</string>
+</resources>
