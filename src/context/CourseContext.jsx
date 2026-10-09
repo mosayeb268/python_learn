@@ -18,6 +18,7 @@ export function CourseProvider({ children }) {
   // Modals state
   const [isCheatSheetOpen, setIsCheatSheetOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCertificateOpen, setIsCertificateOpen] = useState(false);
 
   // Playground code state
   const [playgroundCode, setPlaygroundCode] = useState(
@@ -179,7 +180,9 @@ export function CourseProvider({ children }) {
         isCheatSheetOpen,
         setIsCheatSheetOpen,
         isSearchOpen,
-        setIsSearchOpen
+        setIsSearchOpen,
+        isCertificateOpen,
+        setIsCertificateOpen
       }}
     >
       {children}

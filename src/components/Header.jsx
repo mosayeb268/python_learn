@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Moon, Sun, Search, Code, FileText, CheckCircle2, RotateCcw } from 'lucide-react';
+import { BookOpen, Moon, Sun, Search, Code, FileText, CheckCircle2, RotateCcw, Award } from 'lucide-react';
 import { useCourse } from '../context/CourseContext';
 
 export default function Header() {
@@ -11,6 +11,7 @@ export default function Header() {
     setActiveTab,
     setIsCheatSheetOpen,
     setIsSearchOpen,
+    setIsCertificateOpen,
     resetAllProgress
   } = useCourse();
 
@@ -89,6 +90,16 @@ export default function Header() {
           >
             <Code className="w-4 h-4" />
             <span>ویرایشگر کد</span>
+          </button>
+
+          {/* Certificate of Completion */}
+          <button
+            onClick={() => setIsCertificateOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-xl transition border border-amber-200/60 dark:border-amber-800/60"
+            title="مشاهده و چاپ گواهی پایان دوره"
+          >
+            <Award className="w-4 h-4 text-amber-500" />
+            <span className="hidden sm:inline">گواهی دوره</span>
           </button>
 
           {/* Dark/Light Mode Toggle */}

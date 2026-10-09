@@ -8,10 +8,18 @@ import ChallengeView from './components/ChallengeView';
 import CodePlayground from './components/CodePlayground';
 import CheatSheetModal from './components/CheatSheetModal';
 import SearchModal from './components/SearchModal';
+import CertificateModal from './components/CertificateModal';
 import { BookOpen, HelpCircle, Code2, Terminal } from 'lucide-react';
 
 function MainContent() {
-  const { activeTab, setActiveTab, currentChapter, playgroundCode } = useCourse();
+  const {
+    activeTab,
+    setActiveTab,
+    currentChapter,
+    playgroundCode,
+    isCertificateOpen,
+    setIsCertificateOpen
+  } = useCourse();
 
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 lg:p-8">
@@ -80,6 +88,10 @@ function MainContent() {
       {/* Global Modals */}
       <CheatSheetModal />
       <SearchModal />
+      <CertificateModal
+        isOpen={isCertificateOpen}
+        onClose={() => setIsCertificateOpen(false)}
+      />
     </div>
   );
 }

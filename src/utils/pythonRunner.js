@@ -1,64 +1,58 @@
 /**
- * Python Runner using local browser-based Skulpt engine
- * 100% self-contained, offline-capable, with interactive input support.
+ * Enhanced Python Runner using local browser-based Skulpt engine
+ * 100% self-contained, offline-capable.
+ * Supports:
+ * - Interactive input prompt dialogs
+ * - Automated inputs queue for automated test cases (auto-grading)
+ * - Infinite loop / Timeout protection (Sk.execLimit)
+ * - Intelligent Persian error diagnostics with line number detection
  */
 
-// Persian error explanations mapping to help students learn effectively
 export function explainPythonError(rawError) {
   const errStr = String(rawError || '');
 
-  if (errStr.includes('IndentationError')) {
-    return {
-      title: 'خطای تورفتگی (IndentationError)',
-      description: 'فاصله‌گذاری در ابتدای سطرها در پایتون حیاتی است. بررسی کنید که بلاک‌های کد داخل if یا توابع دقیقاً با ۴ فاصله (یا یک Tab یکدست) تورفتگی داشته باشند.',
-      raw: errStr
-    };
-  }
-  if (errStr.includes('SyntaxError')) {
-    return {
-      title: 'خطای نگارشی (SyntaxError)',
-      description: 'دستور طبق قواعد پایتون نوشته نشده است. بررسی کنید که آیا دونقطه (:) انتهای دستورات شرطی را گذاشته‌اید؟ پرانتزها و کوتیشن‌ها به درستی بسته شده‌اند؟',
-      raw: errStr
-    };
-  }
-  if (errStr.includes('NameError')) {
-    return {
-      title: 'خطای نام متغیر یا تابع (NameError)',
-      description: 'از متغیر یا تابعی استفاده شده که قبلاً تعریف نشده است یا در املای حروف کوچک و بزرگ آن اشتباهی رخ داده است (پایتون به حروف حساس است).',
-      raw: errStr
-    };
-  }
-  if (errStr.includes('TypeError')) {
-    return {
-      title: 'خطای نوع داده (TypeError)',
-      description: 'عملیاتی روی نوع داده نامناسب انجام شده است (مثلاً جمع یک رشته با یک عدد بدون تبدیل نوع با int یا str).',
-      raw: errStr
-    };
-  }
-  if (errStr.includes('ValueError')) {
-    return {
-      title: 'خطای مقدار نامعتبر (ValueError)',
-      description: 'مقدار ورودی برای این تبدیل مناسب نیست؛ به عنوان مثال تلاش برای تبدیل یک کلمه متنی به عدد با تابع int().',
-      raw: errStr
-    };
-  }
-  if (errStr.includes('ZeroDivisionError')) {
-    return {
-      title: 'خطای تقسیم بر صفر (ZeroDivisionError)',
-      description: 'در ریاضیات و پایتون تقسیم هر عدد بر صفر ناممکن و تعریف‌نشده است.',
-      raw: errStr
-    };
+  // Extract line number if available (e.g. "on line 5")
+  const lineMatch = errStr.match(/on line (\d+)/i) || errStr.match(/line (\d+)/i);
+  const lineNumber = lineMatch ? lineMatch[1] : null;
+
+  let title = 'خطای زمان اجرا (Runtime Error)';
+  let description = 'خطایی در هنگام اجرای برنامه رخ داده است.';
+
+  if (errStr.includes('TimeLimitError')) {
+    title = 'خطای محدودیت زمان اجرا (TimeLimitError)';
+    description = 'اجرای کد بیش از حد مجاز (حداکثر ۸ ثانیه) طول کشید. احتمالاً در برنامه یک حلقه بی‌نهایت یا محاسبه بسیار سنگین رخ داده است.';
+  } else if (errStr.includes('IndentationError')) {
+    title = 'خطای تورفتگی (IndentationError)';
+    description = 'فاصله‌گذاری در ابتدای سطرها در پایتون حیاتی است. بررسی کنید که بلاک‌های کد داخل if یا توابع دقیقاً با ۴ فاصله (یا یک Tab یکدست) تورفتگی داشته باشند.';
+  } else if (errStr.includes('SyntaxError')) {
+    title = 'خطای نگارشی (SyntaxError)';
+    description = 'دستور طبق قواعد پایتون نوشته نشده است. بررسی کنید: آیا دونقطه (:) انتهای دستورات شرطی را گذاشته‌اید؟ پرانتزها و کوتیشن‌ها به درستی بسته شده‌اند؟';
+  } else if (errStr.includes('NameError')) {
+    title = 'خطای متغیر یا تابع ناشناخته (NameError)';
+    description = 'از متغیر یا تابعی استفاده شده که قبلاً تعریف نشده یا در املای حروف کوچک و بزرگ آن اشتباهی رخ داده است (پایتون به حروف حساس است).';
+  } else if (errStr.includes('TypeError')) {
+    title = 'خطای نوع داده (TypeError)';
+    description = 'عملیاتی روی نوع داده نامناسب انجام شده است (مثلاً جمع یک رشته با یک عدد بدون تبدیل نوع با int یا str).';
+  } else if (errStr.includes('ValueError')) {
+    title = 'خطای مقدار نامعتبر (ValueError)';
+    description = 'مقدار ورودی برای این تبدیل مناسب نیست؛ به عنوان مثال تلاش برای تبدیل یک کلمه متنی به عدد با تابع int().';
+  } else if (errStr.includes('ZeroDivisionError')) {
+    title = 'خطای تقسیم بر صفر (ZeroDivisionError)';
+    description = 'در ریاضیات و پایتون تقسیم هر عدد بر صفر ناممکن و تعریف‌نشده است.';
   }
 
   return {
-    title: 'خطای زمان اجرا (Runtime Error)',
-    description: 'خطایی در هنگام اجرای کد رخ داده است. لطفاً متن خطا را بررسی فرمایید.',
+    title,
+    description,
+    lineNumber,
     raw: errStr
   };
 }
 
 export function runPythonCode({
   code,
+  predefinedInputs = null,
+  timeoutMs = 8000,
   onOutput,
   onInputRequired,
   onFinished,
@@ -67,11 +61,21 @@ export function runPythonCode({
   const Sk = window.Sk;
 
   if (!Sk) {
-    if (onError) onError('موتور مفسر پایتون بارگذاری نشده است. لطفاً صفحه را تازه‌سازی فرمایید.');
+    if (onError) onError({
+      title: 'موتور مفسر بارگذاری نشده است',
+      description: 'کتابخانه Skulpt در مرورگر یافت نشد. لطفاً صفحه را تازه‌سازی (F5) فرمایید.',
+      raw: 'Sk is undefined'
+    });
     return;
   }
 
   try {
+    // Clone or consume predefined inputs queue for automated test cases
+    let inputQueue = predefinedInputs ? [...predefinedInputs] : null;
+
+    // Timeout limit to prevent browser freeze on infinite loops
+    Sk.execLimit = timeoutMs;
+
     const futureFlags =
       typeof Sk.python3 === 'object' && Sk.python3 !== null
         ? Sk.python3
@@ -108,15 +112,23 @@ export function runPythonCode({
         if (onOutput && promptText) {
           onOutput(promptText);
         }
+
+        // If automated predefined inputs queue exists:
+        if (inputQueue && inputQueue.length > 0) {
+          const autoVal = inputQueue.shift();
+          if (onOutput) onOutput(autoVal + '\n');
+          return Promise.resolve(autoVal);
+        }
+
+        // Interactive user input prompt
         return new Promise((resolve) => {
           if (onInputRequired) {
             onInputRequired(promptText, (userInput) => {
-              // Echo user's typed input with a newline
               if (onOutput) onOutput(userInput + '\n');
               resolve(userInput);
             });
           } else {
-            const result = window.prompt(promptText || 'لطفاً مقدار ورودی را وارد کنید:') || '';
+            const result = window.prompt(promptText || 'مقدار ورودی را وارد کنید:') || '';
             if (onOutput) onOutput(result + '\n');
             resolve(result);
           }
@@ -126,9 +138,19 @@ export function runPythonCode({
       __future__: futureFlags
     });
 
-    const promise = Sk.misceval.asyncToPromise(() =>
-      Sk.importMainWithBody('<stdin>', false, code, true)
+    const promise = Sk.misceval.asyncToPromise(
+      () => Sk.importMainWithBody('<stdin>', false, code, true),
+      {
+        '*': () => {
+          // Check execution limit periodically
+          if (Sk.execLimit && new Date().getTime() - startTime > Sk.execLimit) {
+            throw new Sk.builtin.TimeLimitError('Program exceeded run time limit');
+          }
+        }
+      }
     );
+
+    const startTime = new Date().getTime();
 
     promise
       .then(() => {

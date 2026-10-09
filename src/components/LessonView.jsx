@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Clock,
   CheckCircle,
@@ -27,7 +29,7 @@ export default function LessonView() {
     setActiveTab
   } = useCourse();
 
-  const [copiedIndex, setCopiedIndex] = React.useState(null);
+  const [copiedIndex, setCopiedIndex] = useState(null);
 
   if (!currentLesson) return null;
 
@@ -138,10 +140,105 @@ export default function LessonView() {
         </div>
       </div>
 
-      {/* Main Content Body */}
+      {/* Main Content Body with Rich React-Markdown */}
       <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-        <div className="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 text-sm leading-8 whitespace-pre-line font-sans">
-          {currentLesson.content}
+        <div className="text-slate-800 dark:text-slate-200 text-sm leading-8 font-sans">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              h2: ({ node, ...props }) => (
+                <h2
+                  className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-8 mb-4 pb-2 border-b border-slate-100 dark:border-slate-800"
+                  {...props}
+                />
+              ),
+              h3: ({ node, ...props }) => (
+                <h3
+                  className="text-base sm:text-lg font-bold text-indigo-700 dark:text-indigo-400 mt-6 mb-3 flex items-center gap-2"
+                  {...props}
+                />
+              ),
+              h4: ({ node, ...props }) => (
+                <h4 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 mt-4 mb-2" {...props} />
+              ),
+              p: ({ node, ...props }) => (
+                <p className="text-sm leading-8 text-slate-700 dark:text-slate-300 my-3" {...props} />
+              ),
+              ul: ({ node, ...props }) => (
+                <ul className="list-disc list-inside space-y-2 my-3 pr-2 text-sm text-slate-700 dark:text-slate-300 leading-7" {...props} />
+              ),
+              ol: ({ node, ...props }) => (
+                <ol className="list-decimal list-inside space-y-2 my-3 pr-2 text-sm text-slate-700 dark:text-slate-300 leading-7" {...props} />
+              ),
+              li: ({ node, ...props }) => <li className="text-sm" {...props} />,
+              blockquote: ({ node, ...props }) => (
+                <blockquote
+                  className="border-r-4 border-indigo-500 pr-4 py-2 my-4 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-l-xl text-slate-700 dark:text-slate-300 text-xs sm:text-sm italic"
+                  {...props}
+                />
+              ),
+              table: ({ node, ...props }) => (
+                <div className="overflow-x-auto my-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <table className="w-full text-right text-xs sm:text-sm border-collapse" {...props} />
+                </div>
+              ),
+              thead: ({ node, ...props }) => (
+                <thead className="bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 font-bold" {...props} />
+              ),
+              th: ({ node, ...props }) => (
+                <th className="p-3 border-b border-slate-200 dark:border-slate-700 font-bold" {...props} />
+              ),
+              td: ({ node, ...props }) => (
+                <td className="p-3 border-b border-slate-100 dark:border-slate-800/60 text-slate-600 dark:text-slate-300" {...props} />
+              ),
+              hr: ({ node, ...props }) => (
+                <hr className="my-6 border-slate-200 dark:border-slate-800" {...props} />
+              ),
+              code: ({ node, inline, className, children, ...props }) => {
+                const match = /language-(\w+)/.exec(className || '');
+                const codeString = String(children).replace(/\n$/, '');
+                if (!inline && (match || codeString.includes('\n'))) {
+                  return (
+                    <div className="my-5 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-md">
+                      <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800 text-xs">
+                        <span className="font-mono text-slate-400">{match ? match[1] : 'python'}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => navigator.clipboard.writeText(codeString)}
+                            className="text-slate-400 hover:text-white px-2.5 py-1 rounded-lg transition flex items-center gap-1 hover:bg-slate-800"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>کپی</span>
+                          </button>
+                          <button
+                            onClick={() => openPlaygroundWithCode(codeString)}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 rounded-lg transition flex items-center gap-1.5 shadow-sm"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            <span>اجرا در ویرایشگر</span>
+                          </button>
+                        </div>
+                      </div>
+                      <pre className="p-4 overflow-x-auto font-mono text-xs sm:text-sm text-emerald-300 leading-6" dir="ltr">
+                        <code>{codeString}</code>
+                      </pre>
+                    </div>
+                  );
+                }
+                return (
+                  <code
+                    className="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded-md font-mono text-xs"
+                    dir="ltr"
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                );
+              }
+            }}
+          >
+            {currentLesson.content}
+          </ReactMarkdown>
         </div>
 
         {/* Tips / Callout Boxes */}
@@ -170,12 +267,12 @@ export default function LessonView() {
           </div>
         )}
 
-        {/* Code Examples */}
+        {/* Additional Dedicated Code Examples */}
         {currentLesson.examples && currentLesson.examples.length > 0 && (
           <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Code2 className="w-5 h-5 text-indigo-600" />
-              <span>مثال‌های عملی و کدهای قابل اجرا</span>
+              <span>مثال‌های تکمیلی و کدهای اجرایی درس</span>
             </h3>
 
             {currentLesson.examples.map((ex, idx) => (
