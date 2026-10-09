@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-persian: 'Vazirmatn', 'Segoe UI', Tahoma, Arial, sans-serif;
+    --font-code: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  }
+
+  body {
+    font-family: var(--font-persian);
+    direction: rtl;
+    text-align: right;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-code) !important;
+    direction: ltr;
+    text-align: left;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.8);
+}
