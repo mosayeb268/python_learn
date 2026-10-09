@@ -72,6 +72,28 @@ export function runPythonCode({
   }
 
   try {
+    const futureFlags =
+      typeof Sk.python3 === 'object' && Sk.python3 !== null
+        ? Sk.python3
+        : {
+            print_function: true,
+            division: true,
+            absolute_import: null,
+            unicode_literals: true,
+            python3: true,
+            class_repr: true,
+            inherit_from_object: true,
+            super_args: true,
+            octal_number_literal: true,
+            bankers_rounding: true,
+            python_version: true,
+            dunder_round: true,
+            exceptions: true,
+            no_long_type: true,
+            ceil_floor_int: true,
+            silent_octal_literal: false
+          };
+
     Sk.configure({
       output: (text) => {
         if (onOutput) onOutput(text);
@@ -100,10 +122,9 @@ export function runPythonCode({
           }
         });
       },
-      inputfunTakesPrompt: true
+      inputfunTakesPrompt: true,
+      __future__: futureFlags
     });
-
-    Sk.python3 = true;
 
     const promise = Sk.misceval.asyncToPromise(() =>
       Sk.importMainWithBody('<stdin>', false, code, true)
