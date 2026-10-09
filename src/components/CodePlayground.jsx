@@ -1,4 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { python } from '@codemirror/lang-python';
+import { oneDark } from '@codemirror/theme-one-dark';
+import { EditorView } from '@codemirror/view';
 import {
   Play,
   RotateCcw,
@@ -110,7 +114,6 @@ export default function CodePlayground({ initialCode, onBack }) {
   const inputCallbackRef = useRef(null);
   const inputFieldRef = useRef(null);
   const terminalEndRef = useRef(null);
-  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (initialCode) {
@@ -130,52 +133,17 @@ export default function CodePlayground({ initialCode, onBack }) {
     }
   }, [output, inputPrompt]);
 
-  // Handle Tab key and Auto-indent in Code Editor
-  const handleKeyDown = (e) => {
-    // Ctrl + Enter to run code
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      handleRun();
-      return;
-    }
-
-    // Tab key inserts 4 spaces
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = e.target.selectionStart;
-      const end = e.target.selectionEnd;
-      const val = code;
-      setCode(val.substring(0, start) + '    ' + val.substring(end));
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 4;
-        }
-      }, 0);
-    }
-
-    // Auto-indent on Enter after colon
-    if (e.key === 'Enter') {
-      const start = e.target.selectionStart;
-      const currentLine = code.substring(0, start).split('\n').pop();
-      const match = currentLine.match(/^(\s*)/);
-      let indent = match ? match[1] : '';
-
-      if (currentLine.trim().endsWith(':')) {
-        indent += '    ';
-      }
-
-      if (indent.length > 0) {
+  // Global Ctrl + Enter to run code
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        const end = e.target.selectionEnd;
-        setCode(code.substring(0, start) + '\n' + indent + code.substring(end));
-        setTimeout(() => {
-          if (textareaRef.current) {
-            textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 1 + indent.length;
-          }
-        }, 0);
+        handleRun();
       }
-    }
-  };
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [code]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
@@ -243,10 +211,6 @@ export default function CodePlayground({ initialCode, onBack }) {
       setErrorInfo(null);
     }
   };
-
-  // Line numbers calculation
-  const lineCount = code.split('\n').length;
-  const lineNumbers = Array.from({ length: Math.max(lineCount, 12) }, (_, i) => i + 1);
 
   return (
     <div className="flex flex-col h-full space-y-4">
@@ -341,50 +305,63 @@ export default function CodePlayground({ initialCode, onBack }) {
       </div>
 
       {/* Editor & Terminal Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[500px]">
-        {/* Code Editor Box */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[520px]">
+        {/* Code Editor Box (Strictly LTR for professional code rendering) */}
         <div className="flex flex-col rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-md">
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-950/80 border-b border-slate-800">
+          <div
+            className="flex items-center justify-between px-4 py-2.5 bg-slate-950 border-b border-slate-800"
+            dir="ltr"
+          >
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
-              <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
-              <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
-              <span className="text-xs font-mono text-slate-400 mr-2">main.py</span>
+              <span className="w-3 h-3 rounded-full bg-rose-500/90 inline-block shadow-sm"></span>
+              <span className="w-3 h-3 rounded-full bg-amber-500/90 inline-block shadow-sm"></span>
+              <span className="w-3 h-3 rounded-full bg-emerald-500/90 inline-block shadow-sm"></span>
+              <span className="text-xs font-mono text-slate-300 font-bold ml-2">main.py</span>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-400 font-mono">
-              <span className="text-[11px] text-slate-500 font-sans">Tab = ۴ فاصله</span>
-              <span>Python 3</span>
+            <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+              <span className="px-2 py-0.5 rounded bg-slate-800 text-emerald-400 font-bold">Python 3</span>
             </div>
           </div>
 
-          <div className="relative flex-1 flex bg-slate-900 overflow-hidden">
-            {/* Line Numbers */}
-            <div className="select-none py-3 px-3 text-right font-mono text-xs text-slate-600 bg-slate-950/40 border-l border-slate-800/60 leading-6">
-              {lineNumbers.map((num) => (
-                <div key={num}>{num}</div>
-              ))}
-            </div>
-
-            {/* Code Textarea with Tab & Autoindent handling */}
-            <textarea
-              ref={textareaRef}
+          {/* Real CodeMirror Editor */}
+          <div className="flex-1 bg-slate-900 overflow-hidden code-editor-wrapper" dir="ltr">
+            <CodeMirror
               value={code}
-              onChange={(e) => setCode(e.target.value)}
-              onKeyDown={handleKeyDown}
-              spellCheck={false}
-              className="flex-1 w-full h-full p-3 font-mono text-sm text-emerald-300 bg-transparent resize-none outline-none leading-6 selection:bg-indigo-700 selection:text-white"
-              style={{ direction: 'ltr', textAlign: 'left', tabSize: 4 }}
-              placeholder="# کدهای پایتون خود را اینجا بنویسید..."
+              height="480px"
+              extensions={[
+                python(),
+                EditorView.lineWrapping
+              ]}
+              theme={oneDark}
+              onChange={(val) => setCode(val)}
+              className="h-full text-sm"
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: true,
+                bracketMatching: true,
+                closeBrackets: true,
+                autocompletion: true,
+                highlightActiveLine: true,
+                tabSize: 4
+              }}
             />
           </div>
         </div>
 
         {/* Output Console / Terminal */}
         <div className="flex flex-col rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md">
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-900/90 border-b border-slate-800">
+          <div
+            className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800"
+            dir="ltr"
+          >
             <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-slate-300">کنسول خروجی (Interactive Terminal)</span>
+              <span className="w-3 h-3 rounded-full bg-rose-500/90 inline-block"></span>
+              <span className="w-3 h-3 rounded-full bg-amber-500/90 inline-block"></span>
+              <span className="w-3 h-3 rounded-full bg-emerald-500/90 inline-block"></span>
+              <div className="flex items-center gap-1.5 ml-2 text-slate-300">
+                <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-xs font-bold font-sans">کنسول خروجی (Terminal)</span>
+              </div>
             </div>
             <button
               onClick={handleClearOutput}
@@ -392,7 +369,7 @@ export default function CodePlayground({ initialCode, onBack }) {
               className="flex items-center gap-1 text-xs text-slate-400 hover:text-white hover:bg-slate-800 px-2.5 py-1 rounded-lg transition"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>پاک‌سازی</span>
+              <span className="font-sans">پاک‌سازی</span>
             </button>
           </div>
 
@@ -400,8 +377,11 @@ export default function CodePlayground({ initialCode, onBack }) {
             <div>
               {output ? (
                 <pre
-                  className="whitespace-pre-wrap leading-6 text-emerald-400"
-                  style={{ direction: 'ltr', textAlign: 'left' }}
+                  className="terminal-output text-emerald-400 leading-relaxed"
+                  style={{
+                    unicodeBidi: 'plaintext',
+                    textAlign: 'start'
+                  }}
                 >
                   {output}
                 </pre>
@@ -447,7 +427,7 @@ export default function CodePlayground({ initialCode, onBack }) {
             {inputPrompt && (
               <form
                 onSubmit={handleInputSubmit}
-                className="mt-4 p-3 bg-indigo-950/60 border border-indigo-700/60 rounded-xl flex items-center gap-2 shadow-lg"
+                className="mt-4 p-3 bg-indigo-950/70 border border-indigo-700/80 rounded-xl flex items-center gap-2 shadow-lg"
               >
                 <span className="text-indigo-300 text-xs font-mono shrink-0" dir="ltr">
                   {inputPrompt}

@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { python } from '@codemirror/lang-python';
+import { oneDark } from '@codemirror/theme-one-dark';
+import { EditorView } from '@codemirror/view';
 import {
   CheckCircle2,
   XCircle,
@@ -297,16 +301,19 @@ export default function ChallengeView() {
       {/* Editor & Test Results Console */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Editor */}
-        <div className="rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 flex flex-col min-h-[380px] shadow-md">
-          <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950 border-b border-slate-800">
+        <div className="rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 flex flex-col min-h-[400px] shadow-md">
+          <div
+            className="flex items-center justify-between px-4 py-2.5 bg-slate-950 border-b border-slate-800"
+            dir="ltr"
+          >
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
-              <span className="text-xs font-mono text-slate-400 mr-2">solution.py</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500/90 inline-block"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/90 inline-block"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/90 inline-block"></span>
+              <span className="text-xs font-mono text-slate-300 font-bold ml-2">solution.py</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-slate-500">کلید Tab برای ۴ فاصله</span>
+              <span className="text-[11px] text-slate-500 font-sans">Python 3</span>
               <button
                 onClick={handleReset}
                 title="بازنشانی کد اولیه"
@@ -317,30 +324,44 @@ export default function ChallengeView() {
             </div>
           </div>
 
-          <div className="relative flex-1 flex bg-slate-900 overflow-hidden">
-            <div className="select-none py-3 px-3 text-right font-mono text-xs text-slate-600 bg-slate-950/40 border-l border-slate-800/60 leading-6">
-              {lineNumbers.map((num) => (
-                <div key={num}>{num}</div>
-              ))}
-            </div>
-
-            <textarea
+          <div className="flex-1 bg-slate-900 overflow-hidden code-editor-wrapper" dir="ltr">
+            <CodeMirror
               value={userCode}
-              onChange={(e) => setUserCode(e.target.value)}
-              onKeyDown={handleKeyDown}
-              spellCheck={false}
-              className="flex-1 w-full p-3 font-mono text-xs text-emerald-300 bg-transparent resize-none outline-none leading-6 selection:bg-indigo-700 selection:text-white"
-              style={{ direction: 'ltr', textAlign: 'left', tabSize: 4 }}
+              height="360px"
+              extensions={[
+                python(),
+                EditorView.lineWrapping
+              ]}
+              theme={oneDark}
+              onChange={(val) => setUserCode(val)}
+              className="h-full text-xs"
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: true,
+                bracketMatching: true,
+                closeBrackets: true,
+                autocompletion: true,
+                highlightActiveLine: true,
+                tabSize: 4
+              }}
             />
           </div>
         </div>
 
         {/* Console & Test Results Matrix */}
-        <div className="rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col justify-between min-h-[380px] shadow-md">
-          <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-              <Terminal className="w-3.5 h-3.5 text-teal-400" />
-              <span>کنسول و نتایج ارزیابی تست‌ها</span>
+        <div className="rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col justify-between min-h-[400px] shadow-md">
+          <div
+            className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800"
+            dir="ltr"
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500/90"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/90"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/90"></span>
+              <div className="flex items-center gap-1.5 ml-2 text-slate-300">
+                <Terminal className="w-3.5 h-3.5 text-teal-400" />
+                <span className="text-xs font-bold font-sans">کنسول و نتایج تست‌ها</span>
+              </div>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`}></span>
@@ -352,8 +373,11 @@ export default function ChallengeView() {
             {/* Terminal text output */}
             {output ? (
               <pre
-                className="font-mono text-xs text-emerald-400 leading-5 whitespace-pre-wrap"
-                style={{ direction: 'ltr', textAlign: 'left' }}
+                className="terminal-output text-emerald-400 leading-relaxed"
+                style={{
+                  unicodeBidi: 'plaintext',
+                  textAlign: 'start'
+                }}
               >
                 {output}
               </pre>

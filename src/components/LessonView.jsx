@@ -200,8 +200,13 @@ export default function LessonView() {
                 if (!inline && (match || codeString.includes('\n'))) {
                   return (
                     <div className="my-5 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-md">
-                      <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800 text-xs">
-                        <span className="font-mono text-slate-400">{match ? match[1] : 'python'}</span>
+                      <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800 text-xs" dir="ltr">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500/90 inline-block"></span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500/90 inline-block"></span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/90 inline-block"></span>
+                          <span className="font-mono text-slate-400 font-bold ml-1">{match ? match[1] : 'python'}</span>
+                        </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => navigator.clipboard.writeText(codeString)}
@@ -219,7 +224,11 @@ export default function LessonView() {
                           </button>
                         </div>
                       </div>
-                      <pre className="p-4 overflow-x-auto font-mono text-xs sm:text-sm text-emerald-300 leading-6" dir="ltr">
+                      <pre
+                        className="p-4 overflow-x-auto text-xs sm:text-sm text-emerald-300 leading-relaxed font-code"
+                        dir="ltr"
+                        style={{ direction: 'ltr', textAlign: 'left', unicodeBidi: 'isolate' }}
+                      >
                         <code>{codeString}</code>
                       </pre>
                     </div>
@@ -281,11 +290,16 @@ export default function LessonView() {
                 className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-900 shadow-sm"
               >
                 <div className="flex flex-wrap items-center justify-between px-4 py-2.5 bg-slate-950 border-b border-slate-800 gap-2">
-                  <div>
-                    <h4 className="text-xs font-bold text-white">{ex.title}</h4>
-                    {ex.description && (
-                      <p className="text-[11px] text-slate-400 mt-0.5">{ex.description}</p>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500/90 inline-block"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/90 inline-block"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/90 inline-block"></span>
+                    <div>
+                      <h4 className="text-xs font-bold text-white mr-1.5">{ex.title}</h4>
+                      {ex.description && (
+                        <p className="text-[11px] text-slate-400 mt-0.5 mr-1.5">{ex.description}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -314,12 +328,12 @@ export default function LessonView() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-slate-900 overflow-x-auto">
+                <div className="p-4 bg-slate-900 overflow-x-auto" dir="ltr">
                   <pre
-                    className="font-mono text-xs sm:text-sm text-emerald-300 leading-6"
-                    style={{ direction: 'ltr', textAlign: 'left' }}
+                    className="font-code text-xs sm:text-sm text-emerald-300 leading-relaxed"
+                    style={{ direction: 'ltr', textAlign: 'left', unicodeBidi: 'isolate' }}
                   >
-                    {ex.code}
+                    <code>{ex.code}</code>
                   </pre>
                 </div>
               </div>
